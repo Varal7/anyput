@@ -4,18 +4,6 @@ import json
 cl = []
 
 
-def execute_query(query, socket):
-    # Do something here
-    def cbu(percentage):
-        socket.update_progress(percentage)
-
-    def cb(value):
-        cbu(100)
-        result = json.dumps({'type': 'result', 'value': value})
-        socket.write_message(result)
-
-    compute.compute(query, cb, cbu)
-
 def update_clients():
     broadcast(json.dumps({
         'type': 'nb_clients',
@@ -44,9 +32,6 @@ class SocketHandler(websocket.WebSocketHandler):
             cl.remove(self)
         update_clients()
 
-    def on_message(self, query):
-        execute_query(query, self)
-
     def update_progress(self, percentage):
         progress_message = json.dumps({
             'type': 'progress_update',
@@ -55,20 +40,29 @@ class SocketHandler(websocket.WebSocketHandler):
         self.write_message(progress_message)
 
 class ApiHandler(web.RequestHandler):
-
     @web.asynchronous
     def get(self, *args):
-        self.finish()
-        value = self.get_argument("value")
-        message = json.dumps({
-            'type': 'output',
-            'value': value,
-        })
-        broadcast(message)
+        pass
 
     @web.asynchronous
     def post(self):
-        pass
+        value = self.get_argument("value")
+        key = self.get_argument("key")
+        with open("keys.txt") as f:
+            keys = [k.strip() for k in f.readlines()]
+        if key in keys:
+            message = json.dumps({
+                'type': 'output',
+                'value': value,
+            })
+            broadcast(message)
+            self.write('Sent')
+            self.finish()
+        else:
+            print(key)
+            print(keys)
+            self.write('Not allowed')
+            self.finish()
 
 app = web.Application([
     (r'/', IndexHandler),
