@@ -1,0 +1,3 @@
+# Anyput
+
+Output from anywhere
