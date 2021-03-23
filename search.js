@@ -1,7 +1,7 @@
 'use strict';
 
 var host = window.location.host;
-var ws = new WebSocket('ws://'+host+'/ws');
+var ws = new WebSocket('wss://'+host+'/ws');
 
 var $message = $('#message');
 var $output = $('#output')[0];
